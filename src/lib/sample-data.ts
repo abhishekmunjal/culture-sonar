@@ -17,5 +17,9 @@ export async function loadSampleData() {
     parseEngagement(eng),
     parseOneOnOnes(oneOnOne),
   ]);
-  return { employees, engagement, oneOnOnes };
+  return {
+    employees: employees.rows,
+    engagement: engagement.rows,
+    oneOnOnes: oneOnOnes.rows,
+  };
 }

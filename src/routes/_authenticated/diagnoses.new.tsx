@@ -75,9 +75,12 @@ function NewDiagnosisPage() {
 
     setRunning(true);
     try {
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id;
+      if (!userId) throw new Error("Not signed in");
       const { data: created, error } = await supabase
         .from("diagnoses")
-        .insert({ client_name: clientName.trim(), status: "analyzing" })
+        .insert({ client_name: clientName.trim(), status: "analyzing", user_id: userId })
         .select("id")
         .single();
       if (error) throw error;
@@ -103,9 +106,9 @@ function NewDiagnosisPage() {
         }
       }
 
-      // Trigger AI analysis (server fn) — fire & forget; dashboard will reflect status
+      // Trigger AI analysis (server fn) — fire & forget; dashboard will poll for results
       const { analyzeDiagnosis } = await import("@/lib/analyze.functions");
-      analyzeDiagnosis({ data: { diagnosisId: id } }).catch((e) => console.error(e));
+      analyzeDiagnosis({ data: { diagnosisId: id } }).catch((e: unknown) => console.error(e));
 
       navigate({ to: "/diagnoses/$id", params: { id } });
     } catch (e) {
