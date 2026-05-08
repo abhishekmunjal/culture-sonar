@@ -7,7 +7,7 @@ import { formatDistanceToNow } from "date-fns";
 
 
 
-export const Route = createFileRoute("/_authenticated/diagnoses")({
+export const Route = createFileRoute("/_authenticated/diagnoses/")({
   component: () => <Outlet />,
 });
 
