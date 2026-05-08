@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedDiagnosesRouteImport } from './routes/_authenticated/diagnoses'
 import { Route as AuthenticatedDiagnosesNewRouteImport } from './routes/_authenticated/diagnoses.new'
+import { Route as AuthenticatedDiagnosesIdRouteImport } from './routes/_authenticated/diagnoses.$id'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -40,17 +41,25 @@ const AuthenticatedDiagnosesNewRoute =
     path: '/new',
     getParentRoute: () => AuthenticatedDiagnosesRoute,
   } as any)
+const AuthenticatedDiagnosesIdRoute =
+  AuthenticatedDiagnosesIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedDiagnosesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/diagnoses': typeof AuthenticatedDiagnosesRouteWithChildren
+  '/diagnoses/$id': typeof AuthenticatedDiagnosesIdRoute
   '/diagnoses/new': typeof AuthenticatedDiagnosesNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/diagnoses': typeof AuthenticatedDiagnosesRouteWithChildren
+  '/diagnoses/$id': typeof AuthenticatedDiagnosesIdRoute
   '/diagnoses/new': typeof AuthenticatedDiagnosesNewRoute
 }
 export interface FileRoutesById {
@@ -59,19 +68,21 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
   '/_authenticated/diagnoses': typeof AuthenticatedDiagnosesRouteWithChildren
+  '/_authenticated/diagnoses/$id': typeof AuthenticatedDiagnosesIdRoute
   '/_authenticated/diagnoses/new': typeof AuthenticatedDiagnosesNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/diagnoses' | '/diagnoses/new'
+  fullPaths: '/' | '/login' | '/diagnoses' | '/diagnoses/$id' | '/diagnoses/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/diagnoses' | '/diagnoses/new'
+  to: '/' | '/login' | '/diagnoses' | '/diagnoses/$id' | '/diagnoses/new'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/login'
     | '/_authenticated/diagnoses'
+    | '/_authenticated/diagnoses/$id'
     | '/_authenticated/diagnoses/new'
   fileRoutesById: FileRoutesById
 }
@@ -118,15 +129,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDiagnosesNewRouteImport
       parentRoute: typeof AuthenticatedDiagnosesRoute
     }
+    '/_authenticated/diagnoses/$id': {
+      id: '/_authenticated/diagnoses/$id'
+      path: '/$id'
+      fullPath: '/diagnoses/$id'
+      preLoaderRoute: typeof AuthenticatedDiagnosesIdRouteImport
+      parentRoute: typeof AuthenticatedDiagnosesRoute
+    }
   }
 }
 
 interface AuthenticatedDiagnosesRouteChildren {
+  AuthenticatedDiagnosesIdRoute: typeof AuthenticatedDiagnosesIdRoute
   AuthenticatedDiagnosesNewRoute: typeof AuthenticatedDiagnosesNewRoute
 }
 
 const AuthenticatedDiagnosesRouteChildren: AuthenticatedDiagnosesRouteChildren =
   {
+    AuthenticatedDiagnosesIdRoute: AuthenticatedDiagnosesIdRoute,
     AuthenticatedDiagnosesNewRoute: AuthenticatedDiagnosesNewRoute,
   }
 
@@ -155,3 +175,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
