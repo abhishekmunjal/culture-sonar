@@ -8,13 +8,9 @@ import { formatDistanceToNow } from "date-fns";
 
 
 export const Route = createFileRoute("/_authenticated/diagnoses/")({
-  component: () => <Outlet />,
+  head: () => ({ meta: [{ title: "Diagnoses — OrgPulse" }] }),
+  component: DiagnosesPage,
 });
-
-// export const Route = createFileRoute("/_authenticated/diagnoses")({
-//   head: () => ({ meta: [{ title: "Diagnoses — OrgPulse" }] }),
-//   component: DiagnosesPage,
-// });
 
 type Row = {
   id: string;
