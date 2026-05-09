@@ -106,9 +106,13 @@ function NewDiagnosisPage() {
         }
       }
 
-      // Trigger AI analysis (server fn) — fire & forget; dashboard will poll for results
+      // Trigger AI analysis (server fn). Navigate immediately; dashboard polls
+      // and surfaces errors via the diagnoses.notes field.
       const { analyzeDiagnosis } = await import("@/lib/analyze.functions");
-      analyzeDiagnosis({ data: { diagnosisId: id } }).catch((e: unknown) => console.error(e));
+      analyzeDiagnosis({ data: { diagnosisId: id } }).catch((e: unknown) => {
+        console.error("analyzeDiagnosis failed", e);
+        toast.error(e instanceof Error ? e.message : "Analysis failed to start");
+      });
 
       navigate({ to: "/diagnoses/$id", params: { id } });
     } catch (e) {
